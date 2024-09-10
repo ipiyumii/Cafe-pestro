@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.cafex.models;
 
 import com.cafex.Constants;
@@ -9,10 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
 
-/**
- *
- * @author piyumiimalka
- */
 public class Order implements IOrder{
     
     private int orderId;
@@ -22,6 +15,9 @@ public class Order implements IOrder{
     public Order(int orderId, Date date) {
         this.orderId = orderId;
         this.date = date;
+    }
+
+    public Order() {
     }
     
     @Override
@@ -41,19 +37,22 @@ public class Order implements IOrder{
 
     @Override
     public double getTaxAmount() {
-        return this.getGrossAmount();
+        return this.getGrossAmount() * Constants.TAX_PERCENTAGE;
     }
 
     @Override
     public double getNetAmount() {        
-        double netAmount = 0;
         
-        return netAmount = getGrossAmount() + Constants.TAX_PERCENTAGE;
+        return getGrossAmount() + getTaxAmount();
     }
 
     @Override
     public List<IItem> getItems() {
         return items;
+    }
+
+    public void setItems(List<IItem> items) {
+        this.items = items;
     }
 
 

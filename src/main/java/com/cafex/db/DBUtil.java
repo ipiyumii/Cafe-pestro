@@ -1,13 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.cafex.db;
 
 import com.cafex.models.IItem;
 import com.cafex.models.IOrder;
 import com.cafex.models.Item;
 import com.cafex.models.Order;
+import com.cafex.models.OrderItem;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -18,60 +16,44 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- *
- * @author piyumiimalka
- */
 public class DBUtil {
-      private Connection connection;
+
+    private Connection connection;
     private PreparedStatement statement;
-    
-     public void connect(){
-        try{
+
+    public DBUtil() {
+        try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             String db_url = "jdbc:mysql://localhost:3306/Cafe_Pestro";
-            String db_useR =  "root";
-            String db_pwd= "root";
-            
-            this.connection = DriverManager.getConnection(db_url,db_useR,db_pwd);
+            String db_useR = "root";
+            String db_pwd = "root";
+
+            this.connection = DriverManager.getConnection(db_url, db_useR, db_pwd);
             //Connection.close();
-        }catch(ClassNotFoundException ex){
+        } catch (ClassNotFoundException ex) {
             System.out.println(ex.getMessage());
-         }
-         catch(SQLException ex){
+        } catch (SQLException ex) {
             //JOptionPane.showMessageDialog(Dashboard.this, "Connection failed: " + ex.getMessage());
         }
     }
-    
-     public void insertItem(Item item) {
-        String query = "INSERT INTO Cafe_Pestro.Orders\n" +
-                        "(`Date`, Order_Id)\n" +
-                        "VALUES(CURRENT_TIMESTAMP, 0);";
+
+    public void insertOrder(Double grossAmount, Double taxation, Double NetAmount) {
+        String query = "INSERT INTO Orders\n"
+                + "(`Date`,GrossAmount,Taxation,NetAmount)\n"
+                + "VALUES(CURRENT_TIMESTAMP,?,?,?);";
         try {
             statement = connection.prepareStatement(query, statement.RETURN_GENERATED_KEYS);
+            statement.setDouble(1, grossAmount);
+            statement.setDouble(2, taxation);
+            statement.setDouble(3, NetAmount);
+
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-     
-     public void insertOrder() {
-        String query = "INSERT INTO Cafe_Pestro.Orders\n" +
-                        "(`Date`, Order_Id)\n" +
-                        "VALUES(CURRENT_TIMESTAMP, 0);";
-        try {
-            statement = connection.prepareStatement(query, statement.RETURN_GENERATED_KEYS);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-        
-     //insert orderItems
-     //view orderItemView
-     //getOrderItems
-     
-      public List<IItem> getAllItems() {
+
+    public List<IItem> getAllItems() {
         List<IItem> items = new ArrayList<>();
         String query = "SELECT * FROM items";
         ResultSet resultSet = null;
@@ -83,10 +65,10 @@ public class DBUtil {
                 int itemId = resultSet.getInt("Id");
                 String itemName = resultSet.getString("Item_name");
                 double itemPrice = resultSet.getDouble("Price");
-                Item item = new Item(itemId, itemName, itemPrice);
+                Item item = new Item(itemId, itemName, itemPrice); 
                 items.add(item);
             }
-             } catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             if (resultSet != null) {
@@ -99,10 +81,11 @@ public class DBUtil {
         }
         return items;
     }
-      
-      public List<IOrder> getOrdersList() {
-        List<IOrder> orders = new ArrayList<>();
-        String query = "SELECT * FROM items";
+
+    public List<OrderItem> getOrdersList() {
+        List<OrderItem> orders = new ArrayList<>();
+        String query = "SELECT `Date`, Order_Id, GrossAmount, Taxation, NetAmount\n" +
+                        "FROM Orders";
         ResultSet resultSet = null;
         try {
             statement = connection.prepareStatement(query);
@@ -110,12 +93,16 @@ public class DBUtil {
 
             while (resultSet.next()) {
                 int orderID = resultSet.getInt("Order_Id");
-                Timestamp timestamp = resultSet.getTimestamp("timestamp_column");
+                Timestamp timestamp = resultSet.getTimestamp("Date");
+                Double grossAmount = resultSet.getDouble("GrossAmount");
+                Double taxation = resultSet.getDouble("Taxation");
+                Double netAmount = resultSet.getDouble("NetAmount");
+
                 var date = new Date(timestamp.getTime());
-                Order order = new Order(orderID, date);
-                orders.add(order);
+                OrderItem orderItem = new OrderItem(orderID, date, grossAmount, taxation, netAmount);
+                orders.add(orderItem);
             }
-             } catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             if (resultSet != null) {
@@ -128,18 +115,19 @@ public class DBUtil {
         }
         return orders;
     }
-       
-              
-              
 
- public void close() {
+    public void close() {
         try {
-            if (statement != null)
+            if (statement != null) {
                 statement.close();
-            if (connection != null)
+            }
+            if (connection != null) {
                 connection.close();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+;
 }

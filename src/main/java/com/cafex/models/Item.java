@@ -1,15 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.cafex.models;
 
 import com.cafex.Constants;
 
-/**
- *
- * @author piyumiimalka
- */
 public class Item implements IItem{
 
     private int itemId;
